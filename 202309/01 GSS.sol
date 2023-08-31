@@ -814,7 +814,7 @@ contract GSS is ERC20, Ownable {
     }
 
     function processPair0(address from, address to, uint amount) private {
-        uint256 contractTokenBalance = balanceOf(address(this));
+        uint256 contractTokenBalance = balanceOf(address(this));//获取本合约的余额
         bool overMinTokenBalance = contractTokenBalance >= numTokensSellToSwap0;
         if( overMinTokenBalance &&
             !swapping &&
@@ -1359,7 +1359,7 @@ contract DividendPayingToken is ERC20, Ownable, DividendPayingTokenInterface, Di
   }
 }
 
-
+//业务代码，需要重点关注
 contract DividendTracker is Ownable, DividendPayingToken {
     using SafeMath for uint256;
     using SafeMathInt for int256;
@@ -1385,14 +1385,17 @@ contract DividendTracker is Ownable, DividendPayingToken {
         minimumTokenBalanceForDividends = 50000 * 1e18;
     }
 
+    //不是一个允许交易的合约
     function _transfer(address, address, uint256) internal pure override {
         require(false, "ETHBack_Dividend_Tracker: No transfers allowed");
     }
 
+    //需要使用claim方法提款
     function withdrawDividend() public pure override {
         require(false, "ETHBack_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main ETHBack contract.");
     }
 
+    //看不太懂，好像是一个不设置股息的方法
     function excludeFromDividends(address account) external onlyOwner {
         require(!excludedFromDividends[account]);
         excludedFromDividends[account] = true;
@@ -1403,10 +1406,12 @@ contract DividendTracker is Ownable, DividendPayingToken {
         emit ExcludeFromDividends(account);
     }
 
+    //设置最小股息
     function setMinimumTokenBalanceForDividends(uint256 value) external onlyOwner {
         minimumTokenBalanceForDividends = value;
     }
 
+    //应该是用来更新可以claim的时间
     function updateClaimWait(uint256 newClaimWait) external onlyOwner {
         require(newClaimWait >= 600 && newClaimWait <= 86400, "ETHBack_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
         require(newClaimWait != claimWait, "ETHBack_Dividend_Tracker: Cannot update claimWait to same value");
@@ -1418,12 +1423,13 @@ contract DividendTracker is Ownable, DividendPayingToken {
         return lastProcessedIndex;
     }
 
+    //计算持有人数
     function getNumberOfTokenHolders() external view returns(uint256) {
         return tokenHoldersMap.keys.length;
     }
 
 
-
+    //查询股票利息
     function getAccount(address _account)
         public view returns (
             address account,
@@ -1565,6 +1571,7 @@ contract DividendTracker is Ownable, DividendPayingToken {
     }
 }
 
+//mapper封装
 library IterableMapping {
     // Iterable mapping from address to uint;
     struct Map {
@@ -1626,6 +1633,7 @@ library IterableMapping {
     }
 }
 
+//接口，用于创建交易对，无业务代码
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
@@ -1642,6 +1650,7 @@ interface IUniswapV2Factory {
     function setFeeToSetter(address) external;
 }
 
+//交易对，无业务代码
 interface IUniswapV2Pair {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
@@ -1693,6 +1702,7 @@ interface IUniswapV2Pair {
     function initialize(address, address) external;
 }
 
+//router接口，无业务代码
 interface IUniswapV2Router01 {
     function factory() external pure returns (address);
     function WETH() external pure returns (address);
@@ -1787,6 +1797,7 @@ interface IUniswapV2Router01 {
     function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
 }
 
+//router接口，无业务代码
 interface IUniswapV2Router02 is IUniswapV2Router01 {
     function removeLiquidityETHSupportingFeeOnTransferTokens(
         address token,
@@ -1828,7 +1839,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
     ) external;
 }
 
-
+//计算工具，无业务代码
 library SafeMath {
     /**
      * @dev Returns the addition of two unsigned integers, reverting on
